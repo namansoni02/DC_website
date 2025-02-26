@@ -1,0 +1,181 @@
+/* Global Style */
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #deedf8c5;
+}
+
+/* Header Section */
+.header-section {
+    background-color: #002855;
+    padding: 10px 0;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.logo-image {
+    max-width: 120px;
+    max-height: 120px;
+    width: auto;
+    height: auto;
+}
+
+.heading {
+    color: white;
+    font-size: 2rem;
+    margin: 0;
+    font-weight: bold;
+}
+
+.header-divider {
+    border: 0;
+    border-top: 1px solid #fff;
+    width: 100%;
+    margin: 20px auto;
+}
+
+/* Toggle Section */
+.toggle-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.toggle-button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #fff;
+    color: #002855;
+    border: 2px solid #002855;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.toggle-button:first-child {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+
+.toggle-button:last-child {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.toggle-button.active {
+    background-color: #002855;
+    color: white;
+}
+
+.toggle-button:hover {
+    background-color: #005b96;
+    color: white;
+}
+
+/* Form Section */
+.form-section {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+    padding: 20px;
+}
+
+.form-wrapper {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.form-title2 {
+    color: #002855;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.login-form .ant-form-item-label {
+    font-weight: bold;
+}
+
+.extra-links {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.extra-links a {
+    color: #002855;
+    text-decoration: none;
+}
+
+.extra-links a:hover {
+    text-decoration: underline;
+}
+
+/* Button Styling */
+.btn-primary {
+    width: 100%;
+    padding: 10px;
+    background-color: #002855;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: #005b96;
+}
+
+/* Footer Section */
+.footer-section {
+    background-color: #002855;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    margin-top: auto;
+}
+
+.footer-text {
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-section {
+        margin-bottom: 10px;
+    }
+
+    .heading {
+        font-size: 1.5rem;
+    }
+
+    .logo-image {
+        max-width: 80px;
+        max-height: 80px;
+    }
+
+    .form-wrapper {
+        padding: 15px;
+    }
+
+    .toggle-button {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+}

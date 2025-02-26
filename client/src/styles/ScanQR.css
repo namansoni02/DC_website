@@ -1,0 +1,14 @@
+/* src/styles/ScanQR.css */
+.scan-qr-container {
+    text-align: center;
+    margin: 20px;
+  }
+  
+  .scan-qr-container h2 {
+    margin-bottom: 20px;
+  }
+  
+  .scan-qr-container h3 {
+    margin-top: 20px;
+  }
+  
