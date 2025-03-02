@@ -36,11 +36,13 @@ const Layout = ({ children }) => {
         <div className="layout">
           <div className="sidebar">
             <div className="logo">
-              <img
-                src="/logo.png"
-                alt="IIT Jodhpur Logo"
-                className="logo-image"
-              />
+            <Link to="/">
+               <img
+                 src="/logo.png"
+                 alt="IIT Jodhpur Logo"
+                  className="logo-image"
+               />
+            </Link>
             </div>
             <div className="menu">
               {SidebarMenu.map((menu) => {
@@ -89,3 +91,4 @@ const Layout = ({ children }) => {
 };
 
 export default Layout;
+
