@@ -1,40 +1,67 @@
-import React, { useState } from "react";
-import "../styles/Registerstyle.css"; 
-import { Form, Input, message } from "antd";
+import React, { useState, useEffect } from "react";
+import "../styles/LoginStyle.css"; 
+import { Form, Input, message, Spin } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../redux/features/alertSlice";
 import axios from "axios";
+import { MailOutlined, LockOutlined, UserOutlined, MedicineBoxOutlined } from '@ant-design/icons';
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [loginType, setLoginType] = useState("doctor"); // Toggle between doctor and patient login
+  const [loginType, setLoginType] = useState("doctor");
+  const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
 
-  // Handle form submission
+  // Reset form when login type changes
+  useEffect(() => {
+    form.resetFields();
+  }, [loginType, form]);
+
+  // Handle form submission with improved error handling
   const onFinishHandler = async (values) => {
     try {
+      setLoading(true);
       dispatch(showLoading());
-      const endpoint = loginType === "doctor" ? "/api/v1/doctor/login" : "/api/v1/user/login";
+      
+      const endpoint = loginType === "doctor" 
+        ? "/api/v1/doctor/login" 
+        : "/api/v1/user/login";
+        
       const res = await axios.post(endpoint, values);
-      dispatch(hideLoading());
+      
       if (res?.data?.success) {
         localStorage.setItem("token", res.data.token);
-        localStorage.setItem("loginType", loginType); // Store loginType in localStorage
-        message.success(`${loginType === "doctor" ? "Doctor" : "Patient"} Login Successful`);
-        //navigate("/"); // Redirect without reloading
-        console.log(loginType)
-        if (loginType === "doctor") {
-          navigate("/doctor-homepage"); // Redirect doctor to a different route
-        } else {
-          navigate("/"); // Redirect patient to the homepage
-        }
+        localStorage.setItem("loginType", loginType);
+        
+        message.success({
+          content: `${loginType === "doctor" ? "Doctor" : "Patient"} Login Successful`,
+          style: { marginTop: '20px' },
+        });
+        
+        // Redirect with slight delay for better UX
+        setTimeout(() => {
+          if (loginType === "doctor") {
+            navigate("/doctor-homepage");
+          } else {
+            navigate("/");
+          }
+        }, 500);
       } else {
-        message.error(res?.data?.message || "Login failed");
+        message.error({
+          content: res?.data?.message || "Login failed",
+          style: { marginTop: '20px' },
+        });
       }
     } catch (error) {
-      dispatch(hideLoading());//dispatch
-      message.error("Something went wrong"); // 
+      message.error({
+        content: error.response?.data?.message || "Something went wrong",
+        style: { marginTop: '20px' },
+      });
+    } finally {
+      dispatch(hideLoading());
+      setLoading(false);
     }
   };
 
@@ -56,13 +83,17 @@ const Login = () => {
         <button
           className={`toggle-button ${loginType === "doctor" ? "active" : ""}`}
           onClick={() => setLoginType("doctor")}
+          aria-label="Doctor Login"
         >
+          <MedicineBoxOutlined className="toggle-icon" />
           Doctor Login
         </button>
         <button
           className={`toggle-button ${loginType === "patient" ? "active" : ""}`}
           onClick={() => setLoginType("patient")}
+          aria-label="Patient Login"
         >
+          <UserOutlined className="toggle-icon" />
           Patient Login
         </button>
       </div>
@@ -70,47 +101,74 @@ const Login = () => {
       {/* Main Content Section */}
       <main className="form-section">
         <div className="form-wrapper">
-          <h2 className="form-title">
-            {loginType === "doctor" ? "Doctor Login" : "Patient Login"}
+          <h2 className="form-title2">
+            {loginType === "doctor" 
+              ? <><MedicineBoxOutlined /> Doctor Login</>
+              : <><UserOutlined /> Patient Login</>
+            }
           </h2>
-          <Form
-            layout="vertical"
-            onFinish={onFinishHandler}
-            className="login-form"
-          >
-            {/* Email Field */}
-            <Form.Item
-              label="Email"
-              name="email"
-              rules={[
-                { required: true, message: "Please enter your email!" },
-                { type: "email", message: "Please enter a valid email!" },
-              ]}
+          
+          <Spin spinning={loading} tip="Logging in...">
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={onFinishHandler}
+              className="login-form"
+              requiredMark={false}
+              size="large"
             >
-              <Input placeholder="Enter your email" />
-            </Form.Item>
+              {/* Email Field */}
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[
+                  { required: true, message: "Please enter your email!" },
+                  { type: "email", message: "Please enter a valid email!" },
+                ]}
+              >
+                <Input 
+                  prefix={<MailOutlined className="form-icon" />} 
+                  placeholder="Enter your email" 
+                  autoComplete="email"
+                />
+              </Form.Item>
 
-            {/* Password Field */}
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[{ required: true, message: "Please enter your password!" }]}
-            >
-              <Input.Password placeholder="Enter your password" />
-            </Form.Item>
+              {/* Password Field */}
+              <Form.Item
+                label="Password"
+                name="password"
+                rules={[{ required: true, message: "Please enter your password!" }]}
+              >
+                <Input.Password 
+                  prefix={<LockOutlined className="form-icon" />}
+                  placeholder="Enter your password" 
+                  autoComplete="current-password"
+                />
+              </Form.Item>
 
-            {/* Login Button */}
-            <button className="btn btn-primary" type="submit">
-              Login as {loginType === "doctor" ? "Doctor" : "Patient"}
-            </button>
-          </Form>
+              {/* Login Button */}
+              <Form.Item>
+                <button className="btn-primary" type="submit" disabled={loading}>
+                  {loading ? 'Logging in...' : `Login as ${loginType === "doctor" ? "Doctor" : "Patient"}`}
+                </button>
+              </Form.Item>
+            </Form>
+          </Spin>
 
           {/* Additional Links */}
           <div className="extra-links">
             {loginType === "doctor" ? (
-              <Link to="/doctor-register">Not a registered doctor? Sign up here</Link>
+              <>
+                <Link to="/doctor-register">Not a registered doctor? Sign up here</Link>
+                <div className="divider"></div>
+                <Link to="/forgot-password">Forgot password?</Link>
+              </>
             ) : (
-              <Link to="/register">Not a registered patient? Sign up here</Link>
+              <>
+                <Link to="/register">Not a registered patient? Sign up here</Link>
+                <div className="divider"></div>
+                <Link to="/forgot-password">Forgot password?</Link>
+              </>
             )}
           </div>
         </div>
@@ -119,7 +177,7 @@ const Login = () => {
       {/* Footer Section */}
       <footer className="footer-section">
         <p className="footer-text">
-          © {new Date().getFullYear()} Indian Institute of Technology Jodhpur
+          © {new Date().getFullYear()} Indian Institute of Technology Jodhpur. All rights reserved.
         </p>
       </footer>
     </div>

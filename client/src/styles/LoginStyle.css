@@ -7,59 +7,73 @@ body {
     margin: 0;
     background-color: #f0f7ff;
     color: #333;
-}
-
-/* Header Section */
-.header-section {
+  }
+  
+  .login-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  /* Header Section */
+  .header-section {
     background: linear-gradient(135deg, #002855 0%, #004e92 100%);
     padding: 20px 0;
     text-align: center;
     margin-bottom: 30px;
     box-shadow: 0 4px 12px rgba(0, 40, 85, 0.15);
-}
-
-.logo-container {
+  }
+  
+  .logo-container {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: clamp(1rem, 4vw, 2rem);
     flex-wrap: wrap;
     padding: 0 15px;
-}
-
-.logo-image {
+  }
+  
+  .logo-image {
     max-width: clamp(80px, 15vw, 130px);
     max-height: clamp(80px, 15vw, 130px);
     width: auto;
     height: auto;
     transition: transform 0.3s ease;
-}
-
-.logo-image:hover {
+  }
+  
+  .logo-image:hover {
     transform: scale(1.05);
-}
-
-.heading {
+  }
+  
+  .heading {
     color: white;
-    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-size: clamp(1.2rem, 4vw, 2.2rem);
     margin: 0;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.header-divider {
+  }
+  
+  .header-divider {
     border: 0;
     height: 2px;
     background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.7), transparent);
     width: 80%;
     margin: 25px auto;
-}
-
-/* Toggle Section */
-.toggle-section {
+  }
+  
+  /* Toggle Section */
+  .toggle-section {
     display: flex;
     justify-content: center;
+    margin-bottom: 30px;
+    padding: 0 15px;
+  }
+  
+  .toggle-section {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Adds spacing between the buttons */
     margin-bottom: 30px;
     padding: 0 15px;
 }
@@ -75,42 +89,53 @@ body {
     font-weight: 600;
     width: 100%;
     max-width: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 6px; /* Ensure both buttons have a rounded look */
 }
 
-.toggle-button:first-child {
+
+  
+  .toggle-icon {
+    font-size: 16px;
+  }
+  
+  .toggle-button:first-child {
     border-top-left-radius: 6px;
     border-bottom-left-radius: 6px;
-}
-
-.toggle-button:last-child {
+  }
+  
+  .toggle-button:last-child {
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
-}
-
-.toggle-button.active {
+  }
+  
+  .toggle-button.active {
     background-color: #002855;
     color: white;
     box-shadow: 0 2px 8px rgba(0, 40, 85, 0.25);
-}
-
-.toggle-button:hover {
+  }
+  
+  .toggle-button:hover {
     background-color: #005b96;
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 10px rgba(0, 40, 85, 0.2);
-}
-
-/* Form Section */
-.form-section {
+  }
+  
+  /* Form Section */
+  .form-section {
     display: flex;
     justify-content: center;
     flex: 1;
     padding: 15px;
     width: 100%;
     box-sizing: border-box;
-}
-
-.form-wrapper {
+  }
+  
+  .form-wrapper {
     width: 100%;
     max-width: 420px;
     padding: clamp(20px, 5vw, 30px);
@@ -120,14 +145,14 @@ body {
     background-color: #fff;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     margin: 0 auto;
-}
-
-.form-wrapper:hover {
+  }
+  
+  .form-wrapper:hover {
     transform: translateY(-5px);
     box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
-}
-
-.form-title2 {
+  }
+  
+  .form-title2 {
     color: #002855;
     text-align: center;
     margin-bottom: 25px;
@@ -135,9 +160,13 @@ body {
     font-weight: 700;
     position: relative;
     padding-bottom: 12px;
-}
-
-.form-title2::after {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .form-title2::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -147,18 +176,23 @@ body {
     height: 3px;
     background-color: #002855;
     border-radius: 3px;
-}
-
-.login-form .ant-form-item-label {
+  }
+  
+  .form-icon {
+    color: #002855;
+    margin-right: 8px;
+  }
+  
+  .login-form .ant-form-item-label {
     font-weight: 600;
     color: #444;
-}
-
-.login-form .ant-form-item {
+  }
+  
+  .login-form .ant-form-item {
     margin-bottom: clamp(15px, 3vw, 20px);
-}
-
-.login-form input {
+  }
+  
+  .login-form .ant-input {
     padding: clamp(10px, 2vw, 12px);
     border-radius: 6px;
     border: 1px solid #ddd;
@@ -166,34 +200,49 @@ body {
     width: 100%;
     box-sizing: border-box;
     font-size: clamp(14px, 2vw, 16px);
-}
-
-.login-form input:focus {
+  }
+  
+  .login-form .ant-input:focus,
+  .login-form .ant-input-password:focus,
+  .login-form .ant-input-affix-wrapper:focus,
+  .login-form .ant-input-affix-wrapper-focused {
     border-color: #002855;
     box-shadow: 0 0 0 2px rgba(0, 40, 85, 0.1);
-}
-
-.extra-links {
+  }
+  
+  .login-form .ant-input-affix-wrapper {
+    padding: 0 11px;
+  }
+  
+  /* Extra Links */
+  .extra-links {
     text-align: center;
     margin-top: clamp(15px, 3vw, 20px);
     font-size: clamp(0.85rem, 2vw, 0.95rem);
-}
-
-.extra-links a {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .extra-links a {
     color: #005b96;
     text-decoration: none;
     transition: color 0.3s;
-    margin: 0 8px;
-    display: inline-block;
-}
-
-.extra-links a:hover {
+  }
+  
+  .extra-links a:hover {
     color: #002855;
     text-decoration: underline;
-}
-
-/* Button Styling */
-.btn-primary {
+  }
+  
+  .divider {
+    height: 1px;
+    background-color: #eee;
+    margin: 5px 0;
+  }
+  
+  /* Button Styling */
+  .btn-primary {
     width: 100%;
     padding: clamp(12px, 3vw, 14px);
     background: linear-gradient(135deg, #002855 0%, #004e92 100%);
@@ -205,150 +254,144 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 10px rgba(0, 40, 85, 0.2);
-}
-
-.btn-primary:hover {
+  }
+  
+  .btn-primary:hover {
     background: linear-gradient(135deg, #004e92 0%, #002855 100%);
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 40, 85, 0.25);
-}
-
-.btn-primary:active {
+  }
+  
+  .btn-primary:active {
     transform: translateY(0);
-}
-
-/* Footer Section */
-.footer-section {
+  }
+  
+  .btn-primary:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* Footer Section */
+  .footer-section {
     background: linear-gradient(135deg, #002855 0%, #004e92 100%);
     color: white;
     text-align: center;
     padding: clamp(12px, 3vw, 16px) 15px;
     margin-top: auto;
     box-shadow: 0 -4px 12px rgba(0, 40, 85, 0.15);
-}
-
-.footer-text {
+  }
+  
+  .footer-text {
     margin: 0;
     font-size: clamp(0.85rem, 2vw, 1rem);
     opacity: 0.9;
     line-height: 1.5;
-}
-
-.footer-text a {
-    color: #fff;
-    font-weight: 600;
-    text-decoration: underline;
-    transition: opacity 0.3s;
-}
-
-.footer-text a:hover {
-    opacity: 0.8;
-}
-
-/* Responsive Breakpoints */
-@media (max-width: 992px) {
+  }
+  
+  /* Ant Design Overrides */
+  .ant-spin-nested-loading {
+    width: 100%;
+  }
+  
+  .ant-spin {
+    max-height: none;
+  }
+  
+  .ant-form-item-explain-error {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  
+  /* Responsive Breakpoints */
+  @media (max-width: 992px) {
     .form-wrapper {
-        max-width: 80%;
+      max-width: 80%;
     }
-}
-
-@media (max-width: 768px) {
+  }
+  
+  @media (max-width: 768px) {
     .header-section {
-        margin-bottom: 20px;
-        padding: 15px 0;
+      margin-bottom: 20px;
+      padding: 15px 0;
     }
     
     .logo-container {
-        gap: 1rem;
+      gap: 1rem;
     }
-
+  
     .form-wrapper {
-        max-width: 90%;
+      max-width: 90%;
     }
     
     .toggle-button {
-        max-width: 120px;
+      max-width: 120px;
     }
     
     .header-divider {
-        margin: 15px auto;
+      margin: 15px auto;
     }
-}
-
-@media (max-width: 480px) {
+  }
+  
+  @media (max-width: 480px) {
     .logo-container {
-        flex-direction: column;
-        gap: 0.5rem;
+      flex-direction: column;
+      gap: 0.5rem;
     }
     
     .toggle-section {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
     
     .toggle-button {
-        max-width: 200px;
-        border-radius: 6px !important;
+      max-width: 200px;
+      border-radius: 6px !important;
+      margin-bottom: 10px;
     }
     
     .toggle-button:first-child {
-        border-radius: 6px;
+      border-radius: 6px;
     }
     
     .toggle-button:last-child {
-        border-radius: 6px;
+      border-radius: 6px;
     }
-    
-    .extra-links {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .extra-links a {
-        margin: 5px 0;
-    }
-}
-
-/* Animation for page elements */
-@keyframes fadeIn {
+  }
+  
+  /* Animation for page elements */
+  @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
-}
-
-.header-section, .form-wrapper, .toggle-section {
+  }
+  
+  .header-section, .form-wrapper, .toggle-section {
     animation: fadeIn 0.8s ease forwards;
-}
-
-.toggle-section {
+  }
+  
+  .toggle-section {
     animation-delay: 0.2s;
-}
-
-.form-wrapper {
+  }
+  
+  .form-wrapper {
     animation-delay: 0.4s;
-}
-
-/* Ensure default styles for form elements aren't overridden by browser styles */
-button, input, select, textarea {
-    font-family: inherit;
-    font-size: 100%;
-    margin: 0;
-}
-
-/* Accessibility improvements */
-@media (prefers-reduced-motion: reduce) {
+  }
+  
+  /* Accessibility improvements */
+  @media (prefers-reduced-motion: reduce) {
     * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
-}
-
-/* Touch device optimizations */
-@media (hover: none) {
+  }
+  
+  /* Touch device optimizations */
+  @media (hover: none) {
     .btn-primary:hover, .toggle-button:hover, .form-wrapper:hover, .logo-image:hover {
-        transform: none;
+      transform: none;
     }
-}
+  }
