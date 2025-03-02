@@ -10,7 +10,6 @@ import { CalendarOutlined, DollarOutlined, ClockCircleOutlined } from "@ant-desi
 
 const { Title, Text } = Typography;
 
-// Keep the original function
 const getSpecializationColor = (spec) => {
   if (!spec) return "default";
   const specLower = spec.toLowerCase();
@@ -27,10 +26,9 @@ const BookingPage = () => {
   const dispatch = useDispatch();
   
   const [doctor, setDoctor] = useState(null);
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(null); // Use null instead of an empty string
   const [selectedTime, setSelectedTime] = useState(null);
 
-  // Keep the original useEffect, just add the eslint-disable to prevent warnings
   useEffect(() => {
     const fetchDoctorData = async () => {
       try {
@@ -45,12 +43,10 @@ const BookingPage = () => {
       }
     };
     fetchDoctorData();
-    // eslint-disable-next-line
   }, [params.doctorId]);
 
-  // Keep all the original functions exactly as they were
   const handleDateChange = (value) => {
-    setDate(moment(value).format("DD-MM-YYYY"));
+    setDate(value); // Store the moment object directly
     setSelectedTime(null);
   };
 
@@ -78,7 +74,7 @@ const BookingPage = () => {
           userId: user._id,
           doctorInfo: doctor,
           userInfo: user,
-          date,
+          date: date.format("DD-MM-YYYY"), // Send the appointment date in the correct format
           time: selectedTime,
         },
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
@@ -91,19 +87,17 @@ const BookingPage = () => {
     }
   };
 
-  // These are just style objects, won't cause any issues
   const cardStyle = {
-    width: "100%", // Make the card take up 100% of the container width
-    maxWidth: "1000px", // Ensure the card doesn't exceed 500px in width
-    height: "auto", // Let the height adjust based on content
-    maxHeight: "100%", // Ensure the card doesn't exceed the container's height
+    width: "100%",
+    maxWidth: "1000px",
+    height: "auto",
+    maxHeight: "100%",
     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.1)",
     borderRadius: "12px",
     background: "#fff",
     padding: "24px",
     margin: "0 auto"
   };
-  
 
   const titleStyle = {
     fontSize: "28px",
@@ -130,10 +124,9 @@ const BookingPage = () => {
     gridTemplateColumns: "repeat(4, 1fr)",
     gap: "10px",
     marginTop: "12px",
-    maxHeight: "150px", // Set a maximum height for the time slot grid
-    overflowY: "auto", // Enable vertical scrolling if the content overflows
+    maxHeight: "150px",
+    overflowY: "auto",
   };
-  
 
   const sectionTitleStyle = {
     fontSize: "18px",

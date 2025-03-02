@@ -15,7 +15,14 @@ const Appointments = () => {
         },
       });
       if (res.data.success) {
-        setAppointments(res.data.data);
+        // Sort appointments by year, month, date, and time
+        const sortedAppointments = res.data.data.sort((a, b) => {
+          return moment(a.date + " " + a.time, "DD-MM-YYYY HH:mm").unix() - 
+                 moment(b.date + " " + b.time, "DD-MM-YYYY HH:mm").unix();
+        });
+        
+
+        setAppointments(sortedAppointments);
       }
     } catch (error) {
       console.log(error);
@@ -31,27 +38,13 @@ const Appointments = () => {
       title: "ID",
       dataIndex: "_id",
     },
-    // {
-    //   title: "Name",
-    //   dataIndex: "name",
-    //   render: (text, record) => (
-    //     <span>
-    //       {record.doctorInfo.firstName} {record.doctorInfo.lastName}
-    //     </span>
-    //   ),
-    // },
-    // {
-    //   title: "Phone",
-    //   dataIndex: "phone",
-    //   render: (text, record) => <span>{record.doctorInfo.phone}</span>,
-    // },
     {
       title: "Date & Time",
       dataIndex: "date",
       render: (text, record) => (
         <span>
           {moment(record.date).format("DD-MM-YYYY")} &nbsp;
-          {moment(record.time).format("HH:mm")}
+          {moment(record.time, "HH:mm").format("HH:mm")}
         </span>
       ),
     },
@@ -63,8 +56,8 @@ const Appointments = () => {
 
   return (
     <Layout>
-      <h1 style={{"marginLeft":"5px,"}}>Appoinmtnets Lists</h1>
-      <Table columns={columns} dataSource={appointments} />
+      <h1 style={{ marginLeft: "5px" }}>Appointments List</h1>
+      <Table columns={columns} dataSource={appointments} rowKey="_id" />
     </Layout>
   );
 };

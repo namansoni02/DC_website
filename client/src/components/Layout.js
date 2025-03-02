@@ -8,7 +8,7 @@ import { Badge, message } from "antd";
 const Layout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [userType, setUserType] = useState(null);
+  const [userType, setUserType] = useState(null);//
 
   useEffect(() => {
     const storedLoginType = localStorage.getItem("loginType");

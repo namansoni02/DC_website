@@ -18,7 +18,7 @@ import DoctorAppointments from "./pages/doctors/DoctorAppointments";
 import DoctorRegister from "./pages/doctorregister";
 import ScanQR from "./pages/ScanQR"; // Import the ScanQR component
 import MedicalHistory from "./components/MedicalHistory";
-import PatientProfile from "./pages/patient"; // Import the PatientProfile component
+import PatientProfile from "./pages/UserProfile"; // Import the PatientProfile component
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
