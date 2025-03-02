@@ -1,0 +1,68 @@
+.profile-container {
+    padding: 40px;
+    text-align: center;
+    background-color: #f5f7fa;
+    min-height: 100vh;
+  }
+  
+  .profile-header {
+    margin-bottom: 40px;
+  }
+  
+  .profile-avatar {
+    margin-bottom: 20px;
+    background-color: #003c78;
+  }
+  
+  .profile-title-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .profile-info-container {
+    margin-top: 20px;
+  }
+  
+  .profile-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .loading-spinner {
+    margin-top: 100px;
+  }
+  
+  .profile-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  
+  .action-button {
+    margin: 0 10px;
+    border-radius: 6px;
+    font-size: 16px;
+  }
+  
+  .action-button:first-child {
+    background-color: #1890ff;
+    border: none;
+    color: white;
+  }
+  
+  .action-button:first-child:hover {
+    background-color: #40a9ff;
+  }
+  
+  .action-button:last-child {
+    background-color: white;
+    border: 1px solid #1890ff;
+  }
+  
+  .action-button:last-child:hover {
+    background-color: #f0f0f0;
+  }
+  
