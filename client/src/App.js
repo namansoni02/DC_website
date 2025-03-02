@@ -18,6 +18,7 @@ import DoctorAppointments from "./pages/doctors/DoctorAppointments";
 import DoctorRegister from "./pages/doctorregister";
 import ScanQR from "./pages/ScanQR"; // Import the ScanQR component
 import MedicalHistory from "./components/MedicalHistory";
+import PatientProfile from "./pages/patient"; // Import the PatientProfile component
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -140,6 +141,25 @@ function App() {
               element={
                 <ProtectedRoute>
                   <DrHomePage />
+                </ProtectedRoute>
+              }
+            />
+
+             <Route
+              path="/patient-homepage"
+              element={
+                <ProtectedRoute>
+                  <HomePage/>
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* New Route for User Profile */}
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <PatientProfile />
                 </ProtectedRoute>
               }
             />
