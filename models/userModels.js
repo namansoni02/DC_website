@@ -3,15 +3,16 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "name is required"],
+    required: [true, "Name is required"],
   },
   email: {
     type: String,
-    required: [true, "email is required"],
+    required: [true, "Email is required"],
+    unique: true, // Ensure that email is unique
   },
   password: {
     type: String,
-    required: [true, "password is required"],
+    required: [true, "Password is required"],
   },
   isAdmin: {
     type: Boolean,
@@ -33,9 +34,15 @@ const userSchema = new mongoose.Schema({
     type: String, // Store the QR code as a string (Base64-encoded image or a URL)
     default: "",
   },
-  rollNumber: { type: String, required: true, unique: true }, // Unique identifier
-  medicalHistory: { type: String, default: "" }, // Medical history field
-
+  rollNumber: {
+    type: String,
+    required: [true, "Roll number is required"],
+    unique: true, // Ensure that roll number is unique
+  },
+  medicalHistory: {
+    type: String,
+    default: "",
+  },
 });
 
 const userModel = mongoose.model("users", userSchema);
