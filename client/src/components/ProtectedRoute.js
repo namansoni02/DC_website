@@ -7,28 +7,24 @@ import { setUser } from "../redux/features/userSlice";
 
 export default function ProtectedRoute({ children }) {
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // Using useNavigate for navigation
+  const navigate = useNavigate();
   const { user } = useSelector((state) => state.user);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // To track authentication status
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
 
-  // Memoize the getUser function
   const getUser = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    const loginType = localStorage.getItem("loginType");
+
+    if (!token) {
+      console.log("No token found. Redirecting to login...");
+      setIsAuthenticated(false);
+      setLoading(false);
+      return;
+    }
+
     try {
       dispatch(showLoading());
-      const loginType = localStorage.getItem("loginType");
-      const token = localStorage.getItem("token");
-      console.log("Retrieved Token:", token);
-
-      if (!token) {
-        console.log("No token found. Redirecting to login...");
-        setIsAuthenticated(false);
-        setLoading(false);
-        navigate("/login"); // Redirect using useNavigate
-        return;
-      }
-
-      // Choose the appropriate endpoint based on login type
       const endpoint =
         loginType === "doctor"
           ? "/api/v1/doctor/auth"
@@ -43,72 +39,47 @@ export default function ProtectedRoute({ children }) {
       dispatch(hideLoading());
 
       if (res.data.success) {
-        dispatch(
-          setUser({
-            ...res.data.data,
-            isDoctor: loginType === "doctor",
-          })
-        );
+        dispatch(setUser({ ...res.data.data, isDoctor: loginType === "doctor" }));
         setIsAuthenticated(true);
-
-        // Handle redirections based on user type
-        const currentPath = window.location.pathname;
-        if (loginType === "doctor" && currentPath === "/") {
-          navigate("/doctor-homepage", { replace: true });
-          return;
-        } else if (loginType !== "doctor" && currentPath === "/doctor-homepage") {
-          navigate("/", { replace: true });
-          return;
-        }
       } else {
         setIsAuthenticated(false);
-        navigate("/login"); // Redirect on failed authentication
+        localStorage.removeItem("token"); // Remove invalid token
       }
     } catch (error) {
       dispatch(hideLoading());
+      console.error("Error fetching user:", error);
       setIsAuthenticated(false);
-
-      if (error.response?.status === 401) {
-        console.log("Unauthorized! Redirecting to login...");
-        localStorage.removeItem("token");
-        setLoading(false);
-        navigate("/login", { replace: true }); // Redirect using useNavigate
-      } else {
-        console.log("Error fetching user data:", error);
-      }
+      localStorage.removeItem("token"); // Ensure invalid tokens are cleared
     } finally {
       setLoading(false);
     }
-  }, [dispatch, navigate]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (!user) {
       getUser();
     } else {
-      // If user exists in Redux state, check if they're on the correct route
+      setIsAuthenticated(true);
+      setLoading(false);
+    }
+  }, [user, getUser]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
       const loginType = localStorage.getItem("loginType");
       const currentPath = window.location.pathname;
 
       if (loginType === "doctor" && currentPath === "/") {
         navigate("/doctor-homepage", { replace: true });
-        return;
       } else if (loginType !== "doctor" && currentPath === "/doctor-homepage") {
         navigate("/", { replace: true });
-        return;
       }
-
-      setIsAuthenticated(true);
-      setLoading(false);
     }
-  }, [user, getUser, navigate]);
+  }, [isAuthenticated, navigate]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
 
-  if (isAuthenticated === false || !localStorage.getItem("token")) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   return children;
 }
