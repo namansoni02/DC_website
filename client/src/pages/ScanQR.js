@@ -1,52 +1,57 @@
+// pages/ScanQR.js
 import React, { useState } from "react";
-import { QrReader } from "react-qr-reader"; // Corrected import for named export
-import "../styles/ScanQR.css"; // Import the ScanQR styles
-import { useNavigate } from "react-router-dom"; // Import the hook to handle navigation
+import Layout from "../components/Layout";
+import { QrReader } from "react-qr-reader";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { toast } from "react-hot-toast";
 
-const ScanQR = () => {
-  const [scanResult, setScanResult] = useState("");
-  const navigate = useNavigate(); // To navigate to the medical history page
+function ScanQR() {
+  const [scannedData, setScannedData] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.user);
 
-  const handleScan = (data) => {
-    if (data) {
-      setScanResult(data);
-      alert(`QR Code scanned: ${data}`);
+  const handleScan = (result, error) => {
+    if (error) {
+      console.error(error);
+      toast.error("Error accessing camera");
+      return;
+    }
+
+    if (result?.text && !loading) {
+      setLoading(true);
+      setScannedData(result.text);
       
-      // Assuming the scanned data contains the roll number or ID to fetch medical history
-      const rollNumber = data; // Extract the roll number or medical history ID from the scanned QR code
-      
-      // Redirect to the medical history page using the scanned roll number or ID
-      navigate(`/medical-history/${rollNumber}`);
+      // Simulating a small delay before navigating
+      setTimeout(() => {
+        navigate(`/doctor/user/${result.text}`);
+        setLoading(false);
+      }, 1000);
     }
   };
 
-  const handleError = (err) => {
-    console.error(err);
-  };
-
   return (
-    <div className="scan-qr-container">
-      <h2>Scan QR Code</h2>
-      <QrReader
-        delay={300}
-        style={{ width: "100%" }}
-        onResult={(result, error) => {
-          if (!!result) {
-            handleScan(result?.text); // Updated to use the correct handler
-          }
-
-          if (!!error) {
-            handleError(error);
-          }
-        }}
-      />
-      {scanResult && (
-        <div>
-          <h3>Scan Result: {scanResult}</h3>
-        </div>
-      )}
-    </div>
+    <Layout>
+      <h1 className="page-title">Scan Patient QR Code</h1>
+      <div className="qr-scanner-container">
+        {user?.isDoctor ? (
+          <>
+            <QrReader
+              constraints={{ facingMode: "environment" }} // Back camera
+              onResult={handleScan}
+              style={{ width: "100%" }}
+            />
+            <p>Scan a patient's QR code to view their details</p>
+            {scannedData && <p>Scanned: {scannedData}</p>}
+            {loading && <p>Loading...</p>}
+          </>
+        ) : (
+          <p>Only doctors can access this feature</p>
+        )}
+      </div>
+    </Layout>
   );
-};
+}
 
 export default ScanQR;

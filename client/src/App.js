@@ -16,9 +16,11 @@ import BookingPage from "./pages/BookingPage";
 import Appointments from "./pages/Appointments";
 import DoctorAppointments from "./pages/doctors/DoctorAppointments";
 import DoctorRegister from "./pages/doctorregister";
-import ScanQR from "./pages/ScanQR"; // Import the ScanQR component
-import MedicalHistory from "./components/MedicalHistory";
-import PatientProfile from "./pages/UserProfile"; // Import the PatientProfile component
+import ScanQR from "./pages/GenerateQR";
+import MedicalHistory from "./pages/MedicalHistory";
+import PatientProfile from "./pages/UserProfile";
+import UserDetail from "./pages/userDetail"; // Add this import
+import UserMedicalHistory from "./pages/UserMedicalHistory"; // Add this import
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -145,7 +147,37 @@ function App() {
               }
             />
 
-             <Route
+            {/* The new route you want to add */}
+            <Route
+              path="/doctor/home"
+              element={
+                <ProtectedRoute>
+                  <DrHomePage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* The new route for user details */}
+            <Route
+              path="/doctor/user/:userId"
+              element={
+                <ProtectedRoute>
+                  <UserDetail />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* The new route for user medical history */}
+            <Route
+              path="/user/medical-history"
+              element={
+                <ProtectedRoute>
+                  <UserMedicalHistory />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/patient-homepage"
               element={
                 <ProtectedRoute>
@@ -154,7 +186,6 @@ function App() {
               }
             />
             
-            {/* New Route for User Profile */}
             <Route
               path="/profile"
               element={
