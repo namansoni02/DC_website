@@ -13,8 +13,9 @@ const authMiddleware = require("../middlewares/authMiddlewares.js");
 const router = express.Router();
 const MedicalRecord = require("../models/medicalRecordModel.js");
 const userModel = require("../models/userModels.js");
+const doctorModel = require("../models/doctorModel.js"); // ✅ Ensure correct doctor model is used
 
-// Fetch medical history by rollNumber
+// ✅ Fetch Medical History by Roll Number
 router.get("/user-medical-history/:rollNumber", authMiddleware, async (req, res) => {
   try {
     const { rollNumber } = req.params;
@@ -33,44 +34,42 @@ router.get("/user-medical-history/:rollNumber", authMiddleware, async (req, res)
   }
 });
 
-// ✅ FIXED: Change from POST to PUT for updating medical history
-router.put("/update-medical-history/:rollNumber", authMiddleware, async (req, res) => {
+// ✅ Update or Create Medical History by Roll Number
+router.put("/v1/doctor/update-medical-history/:rollNumber", authMiddleware, async (req, res) => {
   try {
     const { rollNumber } = req.params;
     const { diagnosis, symptoms, prescription, notes, followUpDate, attachments, doctorId } = req.body;
 
     console.log(`Updating medical history for Roll Number: ${rollNumber}`, req.body);
 
-    let patient = await userModel.findOne({ rollNumber });
-    if (!patient) {
-      patient = new userModel({ rollNumber });
-      await patient.save();
-      console.log("✅ Created new patient record for Roll Number:", rollNumber);
+    // ✅ Ensure Doctor ID is provided
+    if (!doctorId) {
+      return res.status(400).json({ success: false, message: "Doctor ID is required" });
     }
 
-    const doctor = await userModel.findById(doctorId);
+    // ✅ Find patient by roll number
+    let patient = await userModel.findOne({ rollNumber });
+    if (!patient) {
+      return res.status(404).json({ success: false, message: "Patient not found" });
+    }
+
+    // ✅ Find doctor by doctorId
+    const doctor = await doctorModel.findById(doctorId);
     if (!doctor) {
       return res.status(404).json({ success: false, message: "Doctor not found" });
     }
 
-    // ✅ FIX: Ensure symptoms is always an array
+    // ✅ Convert symptoms into an array if necessary
     const formattedSymptoms = Array.isArray(symptoms) ? symptoms : symptoms ? [symptoms] : [];
 
-    // ✅ FIX: Instead of creating a new record each time, update the latest one or create if none exist
-    const existingRecord = await MedicalRecord.findOne({ patient: patient._id }).sort({ createdAt: -1 });
+    // ✅ Find the most recent medical record for this patient
+    let existingRecord = await MedicalRecord.findOne({ patient: patient._id }).sort({ createdAt: -1 });
 
-    if (existingRecord) {
-      existingRecord.diagnosis = diagnosis;
-      existingRecord.symptoms = formattedSymptoms;
-      existingRecord.prescription = prescription;
-      existingRecord.notes = notes;
-      existingRecord.followUpDate = followUpDate;
-      existingRecord.attachments = attachments;
-      await existingRecord.save();
-    } else {
-      const newRecord = new MedicalRecord({
+    if (!existingRecord) {
+      // ✅ Create a new medical record if none exists
+      existingRecord = new MedicalRecord({
         patient: patient._id,
-        doctor: doctorId,
+        doctor: doctor._id,
         diagnosis,
         symptoms: formattedSymptoms,
         prescription,
@@ -78,8 +77,19 @@ router.put("/update-medical-history/:rollNumber", authMiddleware, async (req, re
         followUpDate,
         attachments,
       });
-      await newRecord.save();
+    } else {
+      // ✅ Update the latest existing record
+      existingRecord.diagnosis = diagnosis;
+      existingRecord.symptoms = formattedSymptoms;
+      existingRecord.prescription = prescription;
+      existingRecord.notes = notes;
+      existingRecord.followUpDate = followUpDate;
+      existingRecord.attachments = attachments;
+      existingRecord.doctor = doctor._id;
     }
+
+    // ✅ Save the record
+    await existingRecord.save();
 
     res.status(200).json({ success: true, message: "Medical record updated successfully" });
   } catch (error) {
@@ -87,8 +97,47 @@ router.put("/update-medical-history/:rollNumber", authMiddleware, async (req, re
     res.status(500).json({ success: false, message: "Error saving medical record" });
   }
 });
+// Add this route to your doctor router
+router.post("/create-medical-history", authMiddleware, async (req, res) => {
+  try {
+    const { rollNumber, diagnosis, prescription, symptoms, notes, followUpDate, attachments } = req.body;
+    const doctorId = req.body.userId; // This comes from the auth middleware
+    
+    // Find patient by roll number
+    let patient = await userModel.findOne({ rollNumber });
+    if (!patient) {
+      return res.status(404).json({ success: false, message: "Patient not found" });
+    }
+    
+    // Format symptoms to array if needed
+    const formattedSymptoms = Array.isArray(symptoms) ? symptoms : symptoms ? [symptoms] : [];
+    
+    // Create new medical record
+    const newRecord = new MedicalRecord({
+      patient: patient._id,
+      doctor: doctorId,
+      diagnosis,
+      symptoms: formattedSymptoms,
+      prescription,
+      notes,
+      followUpDate,
+      attachments
+    });
+    
+    await newRecord.save();
+    
+    res.status(201).json({ 
+      success: true, 
+      message: "Medical record created successfully",
+      data: newRecord
+    });
+  } catch (error) {
+    console.error("Error creating medical record:", error);
+    res.status(500).json({ success: false, message: "Error creating medical record" });
+  }
+});
 
-// Doctor routes
+// ✅ Doctor Routes
 router.post("/login", doctorloginController);
 router.post("/doctorregister", doctorregisterController);
 router.get("/auth", authMiddleware, doctorauthController);

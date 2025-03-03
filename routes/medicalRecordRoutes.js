@@ -50,9 +50,17 @@ router.post("/create", authMiddleware, async (req, res) => {
       });
     }
 
+    // Find patient by roll number or create new user entry
+    let patient = await User.findOne({ rollNumber: req.body.rollNumber });
+    if (!patient) {
+      patient = new User({ rollNumber: req.body.rollNumber, isPatient: true });
+      await patient.save();
+    }
+
     const newRecord = new MedicalRecord({
       ...req.body,
       doctor: req.body.userId,
+      patient: patient._id,
     });
 
     await newRecord.save();
