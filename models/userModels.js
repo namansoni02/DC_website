@@ -40,8 +40,8 @@ const userSchema = new mongoose.Schema({
     unique: true, // Ensure that roll number is unique
   },
   medicalHistory: {
-    type: String,
-    default: "",
+    type: [String],
+    default: [],
   },
 });
 

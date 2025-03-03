@@ -1,24 +1,23 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import Layout from "./../components/Layout";
-import { Button, Row, Spin, Card, Tabs } from "antd";
-import DoctorList from "../components/DoctorList";
+import Layout from "../components/Layout";
+import { Button, Card, Tabs, Input, message, List, Spin } from "antd";
 import { Html5QrcodeScanner } from "html5-qrcode";
-import { useNavigate } from "react-router-dom";
+import { EditOutlined, SaveOutlined, RedoOutlined, PlusOutlined } from "@ant-design/icons";
+import DoctorList from "../components/DoctorList";
+import "./DrHomePage.css";
 
 const DrHomePage = () => {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("1");
-
-  // QR Scanner States
   const [scanResult, setScanResult] = useState("");
   const [scanLoading, setScanLoading] = useState(false);
-  const [scanError, setScanError] = useState("");
   const qrScannerRef = useRef(null);
-  const navigate = useNavigate();
+  const scannerInitializedRef = useRef(false);
+  const [medicalRecords, setMedicalRecords] = useState([]);
+  const [editing, setEditing] = useState(false);
 
-  // Fetch doctors list
   useEffect(() => {
     const getUserData = async () => {
       try {
@@ -35,145 +34,186 @@ const DrHomePage = () => {
     getUserData();
   }, []);
 
-  // Initialize QR Scanner when QR Tab is active
+  useEffect(() => {
+    return () => cleanupScanner();
+  }, []);
+
   useEffect(() => {
     if (activeTab === "2") {
-      setTimeout(() => {
-        const qrElement = document.getElementById("qr-reader");
-        if (!qrElement) {
-          console.error("QR Scanner element not found.");
-          return;
-        }
+      initializeScanner();
+    } else {
+      cleanupScanner();
+    }
+  }, [activeTab]);
 
+  const initializeScanner = () => {
+    cleanupScanner();
+    setTimeout(() => {
+      try {
+        const qrElement = document.getElementById("qr-reader");
+        if (!qrElement) return;
         const scanner = new Html5QrcodeScanner("qr-reader", {
           fps: 10,
           qrbox: { width: 250, height: 250 },
         });
-
-        scanner.render(
-          async (decodedText) => {
-            if (decodedText) await handleScan(decodedText);
-          },
-          (error) => {
-            console.error("QR Scan Error:", error);
-          }
-        );
-
+        scanner.render(onScanSuccess);
         qrScannerRef.current = scanner;
-      }, 500); // Delay ensures DOM is updated
-    }
-
-    return () => {
-      if (qrScannerRef.current) {
-        qrScannerRef.current.clear();
-        qrScannerRef.current = null;
+        scannerInitializedRef.current = true;
+      } catch (error) {
+        console.error("Error initializing QR scanner:", error);
       }
-    };
-  }, [activeTab]);
+    }, 500);
+  };
 
-  // Handle successful scan
-  const handleScan = async (userId) => {
-    if (!userId) return;
+  const cleanupScanner = () => {
+    if (qrScannerRef.current && scannerInitializedRef.current) {
+      try {
+        qrScannerRef.current.clear();
+      } catch (error) {
+        console.error("Error clearing QR scanner:", error);
+      }
+      qrScannerRef.current = null;
+      scannerInitializedRef.current = false;
+    }
+  };
+
+  const onScanSuccess = async (decodedText) => {
+    console.log("QR Code Scanned:", decodedText);
+    const rollNumber = decodedText.split("/").pop();
+    if (!rollNumber) {
+      message.error("Invalid QR Code");
+      return;
+    }
+    setScanResult(rollNumber);
     setScanLoading(true);
-    setScanResult(userId);
 
     try {
-      const response = await axios.get(
-        `/api/v1/doctor/user-medical-history/${userId}`,
-        {
-          headers: { Authorization: "Bearer " + localStorage.getItem("token") },
-        }
-      );
-
+      const response = await axios.get(`/api/v1/doctor/user-medical-history/${rollNumber}`, {
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+      });
       if (response.data.success) {
-        navigate(`/doctor/user/${userId}`, {
-          state: { userData: response.data.data, fromScanner: true },
-        });
+        message.success("Medical records loaded successfully");
+        setMedicalRecords(response.data.data || []);
+        setActiveTab("3");
       } else {
-        setScanError("Failed to fetch user data.");
+        message.error("Failed to fetch medical records");
       }
-    } catch (err) {
-      setScanError("Failed to fetch user data. Please try again.");
-      console.error(err);
+    } catch (error) {
+      console.error("API error:", error);
+      message.error("Error fetching data");
     } finally {
       setScanLoading(false);
     }
   };
 
+  const handleEditChange = (index, field, value) => {
+    const updatedRecords = [...medicalRecords];
+    updatedRecords[index][field] = field === "symptoms" ? value.split(",").map(s => s.trim()) : value;
+    setMedicalRecords(updatedRecords);
+  };
+
+  const handleSave = async () => {
+    try {
+      if (!scanResult) {
+        message.error("No patient selected");
+        return;
+      }
+      const res = await axios.post(`/api/v1/doctor/update-medical-history/${scanResult}`,
+        { records: medicalRecords },
+        { headers: { Authorization: "Bearer " + localStorage.getItem("token") } }
+      );
+      if (res.data.success) {
+        message.success("Medical records updated");
+        setEditing(false);
+      } else {
+        message.error("Failed to update");
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      message.error("Error saving data");
+    }
+  };
+
+  const handleRescan = () => {
+    setScanResult("");
+    setActiveTab("2");
+    setTimeout(() => initializeScanner(), 300);
+  };
+
+  const addNewRecord = () => {
+    setMedicalRecords([
+      ...medicalRecords,
+      {
+        diagnosis: "",
+        symptoms: [], // Fixed: Symptoms should always be an array
+        prescription: "",
+        notes: "",
+        followUpDate: "",
+      },
+    ]);
+    setEditing(true);
+  };
+
   const tabItems = [
+    { key: "1", label: "Home", children: <Button onClick={() => setActiveTab("2")}>Scan QR</Button> },
     {
-      key: "1",
-      label: "Home",
-      children: loading ? (
-        <div className="text-center my-5">
-          <Spin size="large" />
-        </div>
-      ) : (
-        <Row className="mt-3">
-          <Card title="Welcome to your Dashboard" className="w-100">
-            <p>Use the QR Scanner to quickly access user records.</p>
-            <Button type="primary" onClick={() => setActiveTab("2")}>
-              Scan User QR
-            </Button>
-            <Button className="ms-2" onClick={() => setActiveTab("3")}>
-              View All Doctors
-            </Button>
-          </Card>
-        </Row>
-      ),
-    },
-    {
-      key: "2",
-      label: "QR Scanner",
+      key: "2", label: "QR Scanner",
       children: (
-        <div className="doctor-qr-scanner">
-          <h2>Scan User QR Code</h2>
-          <p>Scan the user's QR code to access their medical history.</p>
-
+        <div>
           <div id="qr-reader" style={{ maxWidth: "500px", margin: "0 auto" }} />
-
-          {scanLoading && (
-            <div className="text-center my-3">
-              <Spin tip="Loading user data..." />
-            </div>
-          )}
-
-          {scanError && (
-            <div className="error-message mt-3 p-3 bg-danger text-white text-center">
-              <p>{scanError}</p>
-              <Button type="primary" onClick={() => setScanError("")}>
-                Dismiss
-              </Button>
-            </div>
-          )}
-
-          {scanResult && !scanLoading && !scanError && (
-            <div className="scan-result mt-3 p-3 bg-success text-white text-center">
-              <p>User ID: {scanResult}</p>
-              <p>Redirecting to user details...</p>
-            </div>
-          )}
+          {scanLoading && <Spin />}
         </div>
       ),
     },
     {
-      key: "3",
-      label: "All Doctors",
-      children: <DoctorList doctors={doctors} />,
+      key: "3", label: "Patient Medical Records",
+      children: (
+        <Card title="Patient Medical History" style={{ margin: "20px", padding: "20px" }}>
+          <p><strong>Patient ID:</strong> {scanResult}</p>
+          <List
+            bordered
+            dataSource={medicalRecords}
+            renderItem={(record, index) => (
+              <List.Item>
+                <div style={{ width: "100%" }}>
+                  <p><strong>Diagnosis:</strong></p>
+                  <Input value={record.diagnosis} onChange={(e) => handleEditChange(index, "diagnosis", e.target.value)} disabled={!editing} />
+
+                  <p><strong>Symptoms:</strong></p>
+                  <Input.TextArea
+                    value={Array.isArray(record.symptoms) ? record.symptoms.join(", ") : ""}
+                    onChange={(e) => handleEditChange(index, "symptoms", e.target.value)}
+                    disabled={!editing}
+                  />
+
+                  <p><strong>Prescription:</strong></p>
+                  <Input value={record.prescription} onChange={(e) => handleEditChange(index, "prescription", e.target.value)} disabled={!editing} />
+
+                  <p><strong>Notes:</strong></p>
+                  <Input.TextArea value={record.notes} onChange={(e) => handleEditChange(index, "notes", e.target.value)} disabled={!editing} />
+
+                  <p><strong>Follow-up Date:</strong></p>
+                  <Input type="date" value={record.followUpDate?.split("T")[0] || ""} onChange={(e) => handleEditChange(index, "followUpDate", e.target.value)} disabled={!editing} />
+                </div>
+              </List.Item>
+            )}
+          />
+          <Button icon={<EditOutlined />} onClick={() => setEditing(!editing)}>
+            {editing ? "Cancel" : "Edit"}
+          </Button>
+          {editing && <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>Save</Button>}
+          <Button icon={<PlusOutlined />} onClick={addNewRecord}>Add New Record</Button>
+          <Button icon={<RedoOutlined />} onClick={handleRescan}>Scan New Patient</Button>
+        </Card>
+      ),
     },
+    { key: "4", label: "All Doctors", children: <DoctorList doctors={doctors} /> },
   ];
 
   return (
     <Layout>
-      <h1 className="text-center">Doctor Dashboard</h1>
-
-      <Tabs
-        defaultActiveKey="1"
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        className="mt-4"
-        items={tabItems}
-      />
+      <h1>Doctor Dashboard</h1>
+      <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
     </Layout>
   );
 };
