@@ -24,6 +24,10 @@ const medicalRecordSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    prescriptionImage: {
+      type: String, // URL or Base64 encoded image data
+      default: "",
+    },
     notes: {
       type: String,
       default: "",

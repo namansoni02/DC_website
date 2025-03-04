@@ -309,3 +309,65 @@
       font-size: 15px;
     }
   }
+
+  /* Add this to your DrHomePage.css file */
+
+.drawing-canvas-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.canvas-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tool-options {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.canvas-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.record-card {
+  margin-bottom: 16px;
+}
+
+.new-record-card {
+  margin-bottom: 16px;
+  border: 1px solid #1890ff;
+  box-shadow: 0 0 8px rgba(24, 144, 255, 0.2);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  margin-bottom: 24px;
+}
+
+.prescription-image-container {
+  margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .canvas-tools {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  canvas {
+    width: 100%;
+    height: auto;
+  }
+}
