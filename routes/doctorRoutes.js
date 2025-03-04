@@ -181,4 +181,6 @@ router.get("/appointments/:doctorId", authMiddleware, async (req, res) => {
   }
 });
 
+
+
 module.exports = router;

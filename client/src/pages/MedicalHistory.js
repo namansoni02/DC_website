@@ -1,59 +1,88 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import axios from "axios";
-import { Input, Button, message } from "antd";
+import { Card, Typography, Collapse, message } from "antd";
+import Layout from "../components/Layout";
 
-const MedicalHistory = () => {
-  const { rollNumber } = useParams();
-  const [medicalHistory, setMedicalHistory] = useState("");
-  const [isDoctor, setIsDoctor] = useState(false);
+const { Title, Text } = Typography;
+const { Panel } = Collapse;
+
+const UserMedicalHistory = () => {
+  const [medicalRecords, setMedicalRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMedicalHistory = async () => {
       try {
-        const res = await axios.get(`/api/v1/user/medical-history/${rollNumber}`, {
-          headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+        const res = await axios.get("/api/v1/user/user-medical-history/current", {
+          headers: { 
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            'Content-Type': 'application/json'
+          }
         });
+        
         if (res.data.success) {
-          setMedicalHistory(res.data.data.medicalHistory);
-          setIsDoctor(localStorage.getItem("isDoctor") === "true");
+          setMedicalRecords(res.data.data || []);
+        } else {
+          message.info("No medical records found");
         }
       } catch (error) {
-        message.error("Error fetching medical history");
+        console.error("Error fetching medical records:", error);
+        message.error("Failed to fetch medical records");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchMedicalHistory();
-  }, [rollNumber]);
-
-  const handleUpdate = async () => {
-    try {
-      const res = await axios.post(
-        `/api/v1/user/medical-history/${rollNumber}`,
-        { medicalHistory },
-        { headers: { Authorization: "Bearer " + localStorage.getItem("token") } }
-      );
-      if (res.data.success) message.success("Medical history updated");
-    } catch (error) {
-      message.error("Error updating history");
-    }
-  };
+  }, []);
 
   return (
-    <div>
-      <h2>Medical History of Roll No: {rollNumber}</h2>
-      {isDoctor ? (
-        <Input.TextArea
-          rows={6}
-          value={medicalHistory}
-          onChange={(e) => setMedicalHistory(e.target.value)}
-        />
+    <Layout>
+      <Title level={2}>My Medical History</Title>
+      
+      {loading ? (
+        <Text>Loading medical records...</Text>
+      ) : medicalRecords.length === 0 ? (
+        <Card>
+          <Text>No medical records found.</Text>
+        </Card>
       ) : (
-        <p>{medicalHistory}</p>
+        <Collapse accordion>
+          {medicalRecords
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .map((record, index) => (
+              <Panel 
+                header={`Date: ${new Date(record.createdAt).toLocaleString()}`} 
+                key={index}
+              >
+                <Card>
+                  <Text strong>Diagnosis:</Text>
+                  <p>{record.diagnosis}</p>
+
+                  {record.prescription && (
+                    <>
+                      <Text strong>Prescription:</Text>
+                      <p>{record.prescription}</p>
+                    </>
+                  )}
+
+                  {record.prescriptionImage && (
+                    <div className="prescription-image-container">
+                      <Text strong>Prescription Image:</Text>
+                      <img 
+                        src={record.prescriptionImage} 
+                        alt="Prescription Drawing" 
+                        style={{ maxWidth: "100%", marginTop: "10px", border: "1px solid #ddd" }} 
+                      />
+                    </div>
+                  )}
+                </Card>
+              </Panel>
+            ))}
+        </Collapse>
       )}
-      {isDoctor && <Button type="primary" onClick={handleUpdate}>Save</Button>}
-    </div>
+    </Layout>
   );
 };
 
-export default MedicalHistory;
+export default UserMedicalHistory;

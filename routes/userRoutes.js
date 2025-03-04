@@ -16,7 +16,51 @@ const authMiddleware = require("../middlewares/authMiddlewares");
 
 //router onject
 const router = express.Router();
+router.get("/user-medical-history/current", authMiddleware, async (req, res) => {
+  try {
+    console.log("Fetching medical history for user ID:", req.body.userId);
 
+    // Ensure these are properly imported at the top of the file
+    const MedicalRecord = require("../models/medicalRecordModel");
+    const User = require("../models/userModels");
+
+    const userId = req.body.userId;
+
+    // Add more detailed logging
+    console.log("Full request body:", req.body);
+    console.log("Authentication:", req.headers.authorization);
+
+    // Verify user exists
+    const patient = await User.findById(userId);
+    if (!patient) {
+      console.error("Patient not found for ID:", userId);
+      return res.status(404).json({ 
+        success: false, 
+        message: "Patient not found" 
+      });
+    }
+
+    // Fetch medical records with doctor details
+    const records = await MedicalRecord.find({ patient: patient._id })
+      .populate("doctor", "name") // Note: changed from doctorId to doctor
+      .sort({ createdAt: -1 }) // Changed from date to createdAt
+      .lean();
+
+    console.log("Found records:", records.length);
+
+    res.status(200).json({ 
+      success: true, 
+      data: records 
+    });
+  } catch (error) {
+    console.error("Detailed error fetching medical records:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Error fetching medical records",
+      errorDetails: error.message 
+    });
+  }
+});
 //routes
 //LOGIN || POST
 router.post("/login", loginController);

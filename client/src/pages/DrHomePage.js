@@ -113,15 +113,18 @@ const DrHomePage = () => {
         return;
     }
 
-    console.log("Saving drawing with Base64 data:", imageData);
+    setNewRecord((prev) => {
+        // If the image is already saved, don't update the state
+        if (prev.prescriptionImage === imageData) {
+            console.log("Drawing is already saved.");
+            return prev;
+        }
 
-    setNewRecord((prev) => ({
-        ...prev,
-        prescriptionImage: imageData,
-    }));
+        // console.log("Saving drawing with Base64 data:", imageData);
 
-    console.log("Drawing saved! Click 'Add Record' to save it.");
-    message.success("Drawing saved! Click 'Add Record' to save it.");
+        // message.success("Drawing saved! Click 'Add Record' to save it.");
+        return { ...prev, prescriptionImage: imageData };
+    });
 };
 
 const handleAddRecord = async () => {
