@@ -186,164 +186,171 @@ const handleAddRecord = async () => {
 };
 
 
-  const renderTabItems = () => [
-    {
-      key: "1",
-      label: "Home",
-      children: (
-        <div>
-          <Title level={3}>Welcome to Doctor Dashboard</Title>
-          <Text>Use this dashboard to manage patient records and consultations.</Text>
-          <div style={{ marginTop: "20px" }}>
-            <Button 
-              type="primary" 
-              onClick={() => setActiveTab("2")}
-              icon={<PlusOutlined />}
-            >
-              Scan Patient QR
-            </Button>
-          </div>
-        </div>
-      )
-    },
-    {
-      key: "2",
-      label: "QR Scanner",
-      children: (
-        <div>
-          <Title level={4}>Scan Patient QR Code</Title>
-          <div id="qr-reader" style={{ maxWidth: "500px" }} />
-          {scanLoading && <Text>Loading patient data...</Text>}
-        </div>
-      )
-    },
-    {
-      key: "3",
-      label: "Medical Records",
-      children: (
-        <div>
-          <Card>
-            <p><strong>Patient ID:</strong> {scanResult}</p>
-          </Card>
-
-          {medicalRecords.length === 0 ? (
-            <Text>No medical records found for this patient.</Text>
-          ) : (
-            <Collapse accordion style={{ marginTop: "15px", marginBottom: "20px" }}>
-              {medicalRecords
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                .map((record, index) => (
-                  <Panel 
-                    header={`Date: ${new Date(record.createdAt).toLocaleString()}`} 
-                    key={index}
-                  >
-                    <Card>
-                      <Text strong>Diagnosis:</Text>
-                      <p>{record.diagnosis}</p>
-
-                      {record.prescription && (
-                        <>
-                          <Text strong>Prescription:</Text>
-                          <p>{record.prescription}</p>
-                        </>
-                      )}
-
-                      {record.prescriptionImage && (
-                        <div className="prescription-image-container">
-                          <Text strong>Prescription Image:</Text>
-                          <img 
-                            src={record.prescriptionImage} 
-                            alt="Prescription Drawing" 
-                            style={{ maxWidth: "100%", marginTop: "10px", border: "1px solid #ddd" }} 
-                          />
-                        </div>
-                      )}
-                    </Card>
-                  </Panel>
-                ))}
-            </Collapse>
-          )}
-
-          <Card className="new-record-card">
-            <Title level={4}>Add New Record</Title>
-            <div style={{ marginBottom: "15px" }}>
-              <Text strong>Diagnosis:</Text>
-              <Input 
-                value={newRecord.diagnosis} 
-                onChange={(e) => setNewRecord({ ...newRecord, diagnosis: e.target.value })}
-                placeholder="Enter diagnosis"
-                style={{ marginTop: "5px" }}
-              />
-            </div>
-            
-            <div style={{ marginBottom: "15px" }}>
-              <Text strong>Prescription Type:</Text>
-              <Radio.Group 
-                value={prescriptionType} 
-                onChange={(e) => setPrescriptionType(e.target.value)}
-                style={{ marginLeft: "10px" }}
-              >
-                <Radio value="text">Text</Radio>
-                <Radio value="drawing">Drawing</Radio>
-              </Radio.Group>
-            </div>
-            
-            <div style={{ marginBottom: "15px" }}>
-              <Text strong>Prescription:</Text>
-              {prescriptionType === "text" ? (
-                <Input.TextArea 
-                  rows={4}
-                  value={newRecord.prescription} 
-                  onChange={(e) => setNewRecord({ ...newRecord, prescription: e.target.value })} 
-                  placeholder="Enter prescription details"
-                  style={{ marginTop: "5px" }}
-                />
-              ) : (
-                <div style={{ marginTop: "10px", border: "1px solid #ddd", padding: "10px" }}>
-                  <FabricDrawingCanvas
-                    onSave={handleSaveDrawing}
-                    initialImage={newRecord.prescriptionImage}
-                  />
-                </div>
-              )}
-            </div>
-            
-            <Button 
-              icon={<PlusOutlined />} 
-              onClick={handleAddRecord}
-              type="primary"
-            >
-              Add Record
-            </Button>
-          </Card>
-
+const renderTabItems = () => [
+  {
+    key: "1",
+    label: "Home",
+    children: (
+      <div>
+        <Title level={3}>Welcome to Doctor Dashboard</Title>
+        <Text>Use this dashboard to manage patient records and consultations.</Text>
+        <div style={{ marginTop: "20px" }}>
           <Button 
-            icon={<RedoOutlined />} 
+            type="primary" 
             onClick={() => setActiveTab("2")}
-            style={{ marginTop: "15px" }}
+            icon={<PlusOutlined />}
           >
-            Scan Another Patient
+            Scan Patient QR
           </Button>
         </div>
-      )
-    },
-    {
-      key: "4",
-      label: "All Doctors",
-      children: <DoctorList doctors={doctors} loading={loading} />
-    }
-  ];
+      </div>
+    )
+  },
+  {
+    key: "2",
+    label: "QR Scanner",
+    children: (
+      <div>
+        <Title level={4}>Scan Patient QR Code</Title>
+        <div id="qr-reader" style={{ maxWidth: "500px" }} />
+        {scanLoading && <Text>Loading patient data...</Text>}
+      </div>
+    )
+  },
+  {
+    key: "3",
+    label: "Medical History",
+    children: (
+      <div>
+        <Card>
+          <p><strong>Patient ID:</strong> {scanResult}</p>
+        </Card>
 
-  return (
-    <Layout>
-      <Title>Doctor Dashboard</Title>
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        items={renderTabItems()}
-      />
-    </Layout>
-  );
+        {medicalRecords.length === 0 ? (
+          <Text>No medical records found for this patient.</Text>
+        ) : (
+          <Collapse accordion style={{ marginTop: "15px", marginBottom: "20px" }}>
+            {medicalRecords
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+              .map((record, index) => (
+                <Panel 
+                  header={`Date: ${new Date(record.createdAt).toLocaleString()}`} 
+                  key={index}
+                >
+                  <Card>
+                    <Text strong>Diagnosis:</Text>
+                    <p>{record.diagnosis}</p>
+
+                    {record.prescription && (
+                      <>
+                        <Text strong>Prescription:</Text>
+                        <p>{record.prescription}</p>
+                      </>
+                    )}
+
+                    {record.prescriptionImage && (
+                      <div className="prescription-image-container">
+                        <Text strong>Prescription Image:</Text>
+                        <img 
+                          src={record.prescriptionImage} 
+                          alt="Prescription Drawing" 
+                          style={{ maxWidth: "100%", marginTop: "10px", border: "1px solid #ddd" }} 
+                        />
+                      </div>
+                    )}
+                  </Card>
+                </Panel>
+              ))}
+          </Collapse>
+        )}
+
+        <Button 
+          icon={<RedoOutlined />} 
+          onClick={() => setActiveTab("2")}
+          style={{ marginTop: "15px" }}
+        >
+          Scan Another Patient
+        </Button>
+      </div>
+    )
+  },
+  {
+    key: "4",
+    label: "Write Prescription",
+    children: (
+      <div>
+        <Card className="new-record-card">
+          <Title level={4}>Write New Prescription</Title>
+          <div style={{ marginBottom: "15px" }}>
+            <Text strong>Diagnosis:</Text>
+            <Input 
+              value={newRecord.diagnosis} 
+              onChange={(e) => setNewRecord({ ...newRecord, diagnosis: e.target.value })}
+              placeholder="Enter diagnosis"
+              style={{ marginTop: "5px" }}
+            />
+          </div>
+          
+          <div style={{ marginBottom: "15px" }}>
+            <Text strong>Prescription Type:</Text>
+            <Radio.Group 
+              value={prescriptionType} 
+              onChange={(e) => setPrescriptionType(e.target.value)}
+              style={{ marginLeft: "10px" }}
+            >
+              <Radio value="text">Text</Radio>
+              <Radio value="drawing">Drawing</Radio>
+            </Radio.Group>
+          </div>
+          
+          <div style={{ marginBottom: "15px" }}>
+            <Text strong>Prescription:</Text>
+            {prescriptionType === "text" ? (
+              <Input.TextArea 
+                rows={4}
+                value={newRecord.prescription} 
+                onChange={(e) => setNewRecord({ ...newRecord, prescription: e.target.value })} 
+                placeholder="Enter prescription details"
+                style={{ marginTop: "5px" }}
+              />
+            ) : (
+              <div style={{ marginTop: "10px", border: "1px solid #ddd", padding: "10px" }}>
+                <FabricDrawingCanvas
+                  onSave={handleSaveDrawing}
+                  initialImage={newRecord.prescriptionImage}
+                />
+              </div>
+            )}
+          </div>
+          
+          <Button 
+            icon={<PlusOutlined />} 
+            onClick={handleAddRecord}
+            type="primary"
+          >
+            Add Record
+          </Button>
+        </Card>
+      </div>
+    )
+  },
+  {
+    key: "5",
+    label: "All Doctors",
+    children: <DoctorList doctors={doctors} loading={loading} />
+  }
+];
+
+return (
+  <Layout>
+    <Title>Doctor Dashboard</Title>
+    <Tabs
+      activeKey={activeTab}
+      onChange={setActiveTab}
+      items={renderTabItems()}
+    />
+  </Layout>
+);
 };
 
 export default DrHomePage;

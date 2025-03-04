@@ -14,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "antd": "^5.24.2",
+    "autoprefixer": "^10.4.20",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "colors": "^1.4.0",
@@ -26,11 +27,13 @@
     "mongoose": "^8.9.5",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.7",
+    "postcss": "^8.5.3",
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",
     "react-canvas-draw": "^1.2.1",
     "react-hot-toast": "^2.5.2",
     "react-qr-reader": "^3.0.0-beta-1",
-    "react-signature-canvas": "^1.1.0-alpha.1"
+    "react-signature-canvas": "^1.1.0-alpha.1",
+    "tailwindcss": "^4.0.9"
   }
 }
