@@ -108,69 +108,83 @@ const DrHomePage = () => {
 
   const handleSaveDrawing = (imageData) => {
     if (!imageData) {
-      message.warning("No drawing data to save");
-      return;
+        console.warn("No drawing data to save");
+        message.warning("No drawing data to save");
+        return;
     }
-    
-    setNewRecord({ ...newRecord, prescriptionImage: imageData });
-    message.success("Drawing saved! Click 'Add Record' to save it.");
-  };
 
-  const handleAddRecord = async () => {
+    console.log("Saving drawing with Base64 data:", imageData);
+
+    setNewRecord((prev) => ({
+        ...prev,
+        prescriptionImage: imageData,
+    }));
+
+    console.log("Drawing saved! Click 'Add Record' to save it.");
+    message.success("Drawing saved! Click 'Add Record' to save it.");
+};
+
+const handleAddRecord = async () => {
     // Validate input
     if (!scanResult) {
-      message.error("No patient ID found. Please scan a QR code first.");
-      return;
+        message.error("No patient ID found. Please scan a QR code first.");
+        return;
     }
-    
+
     if (!newRecord.diagnosis.trim()) {
-      message.error("Diagnosis is required");
-      return;
+        message.error("Diagnosis is required");
+        return;
     }
-    
+
     if (prescriptionType === "text" && !newRecord.prescription.trim()) {
-      message.error("Prescription text is required");
-      return;
+        message.error("Prescription text is required");
+        return;
     }
-    
+
     if (prescriptionType === "drawing" && !newRecord.prescriptionImage) {
-      message.error("Please save a prescription drawing first");
-      return;
+        message.error("Please save a prescription drawing first");
+        return;
     }
+
+    console.log("Final record before sending:", newRecord);
 
     try {
-      const recordToSend = {
-        rollNumber: scanResult,
-        diagnosis: newRecord.diagnosis.trim(),
-        prescription: prescriptionType === "text" ? newRecord.prescription.trim() : "See prescription image",
-        prescriptionImage: prescriptionType === "drawing" ? newRecord.prescriptionImage : ""
-      };
+        const recordToSend = {
+            rollNumber: scanResult,
+            diagnosis: newRecord.diagnosis.trim(),
+            prescription: prescriptionType === "text" ? newRecord.prescription.trim() : "See prescription image",
+            prescriptionImage: prescriptionType === "drawing" ? newRecord.prescriptionImage : ""
+        };
 
-      const res = await axios.post("/api/v1/doctor/create-medical-history", recordToSend, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+        console.log("Sending record:", recordToSend);
 
-      if (res.data.success) {
-        message.success("New record added successfully");
-        // Fetch updated records instead of clearing them
-        const updatedRecords = await axios.get(`/api/v1/doctor/user-medical-history/${scanResult}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        const res = await axios.post("/api/v1/doctor/create-medical-history", recordToSend, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        
-        if (updatedRecords.data.success) {
-          setMedicalRecords(updatedRecords.data.data || []);
+
+        if (res.data.success) {
+            message.success("New record added successfully");
+
+            // Fetch updated records instead of clearing them
+            const updatedRecords = await axios.get(`/api/v1/doctor/user-medical-history/${scanResult}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+
+            if (updatedRecords.data.success) {
+                setMedicalRecords(updatedRecords.data.data || []);
+            }
+
+            // Reset form
+            setNewRecord({ diagnosis: "", prescription: "", prescriptionImage: "" });
+        } else {
+            message.error(res.data.message || "Failed to add record");
         }
-        
-        // Reset form
-        setNewRecord({ diagnosis: "", prescription: "", prescriptionImage: "" });
-      } else {
-        message.error(res.data.message || "Failed to add record");
-      }
     } catch (error) {
-      console.error("Error adding record:", error);
-      message.error("Error adding record. Please try again.");
+        console.error("Error adding record:", error);
+        message.error("Error adding record. Please try again.");
     }
-  };
+};
+
 
   const renderTabItems = () => [
     {
