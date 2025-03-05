@@ -13,7 +13,7 @@ const UserMedicalHistory = () => {
   useEffect(() => {
     const fetchMedicalHistory = async () => {
       try {
-        const res = await axios.get("/api/v1/user/user-medical-history/current", {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/user/user-medical-history/current`, {
           headers: { 
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             'Content-Type': 'application/json'

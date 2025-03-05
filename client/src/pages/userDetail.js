@@ -28,7 +28,7 @@ function UserDetail() {
   const getUserDetails = async () => {
     try {
       const userResponse = await axios.post(
-        "/api/admin/get-user-info-by-id",
+        `${process.env.REACT_APP_API_URL}/api/admin/get-user-info-by-id`,
         { userId },
         {
           headers: {
@@ -42,7 +42,7 @@ function UserDetail() {
       }
 
       const recordsResponse = await axios.get(
-        `/api/medical-records/user/${userId}`,
+        `${process.env.REACT_APP_API_URL}/api/medical-records/user/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -72,7 +72,7 @@ function UserDetail() {
       };
 
       const response = await axios.post(
-        "/api/medical-records/create",
+        `${process.env.REACT_APP_API_URL}/api/medical-records/create`,
         formattedRecord,
         {
           headers: {

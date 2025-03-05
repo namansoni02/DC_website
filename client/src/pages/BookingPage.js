@@ -33,7 +33,7 @@ const BookingPage = () => {
     const fetchDoctorData = async () => {
       try {
         const res = await axios.post(
-          "/api/v1/doctor/getDoctorById",
+          `${process.env.REACT_APP_API_URL}/api/v1/doctor/getDoctorById`,
           { doctorId: params.doctorId },
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
@@ -68,7 +68,7 @@ const BookingPage = () => {
     try {
       dispatch(showLoading());
       const res = await axios.post(
-        "/api/v1/user/book-appointment",
+        `${process.env.REACT_APP_API_URL}/api/v1/user/book-appointment`,
         {
           doctorId: params.doctorId,
           userId: user._id,

@@ -26,8 +26,8 @@ const Login = () => {
       dispatch(showLoading());
       
       const endpoint = loginType === "doctor" 
-        ? "/api/v1/doctor/login" 
-        : "/api/v1/user/login";
+        ? `${process.env.REACT_APP_API_URL}/api/v1/doctor/login`
+        : `${process.env.REACT_APP_API_URL}/api/v1/user/login`;
         
       const res = await axios.post(endpoint, values);
       

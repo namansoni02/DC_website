@@ -14,7 +14,7 @@ function UserMedicalHistory() {
   const getMedicalRecords = async () => {
     try {
       const response = await axios.get(
-        `/api/medical-records/user/${user?._id}`,
+        `${process.env.REACT_APP_API_URL}/api/medical-records/user/${user?._id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

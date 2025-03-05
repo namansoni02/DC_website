@@ -26,7 +26,7 @@ const DoctorRegister = () => {
       };
 
       const res = await axios.post(
-        "/api/v1/doctor/doctorregister",
+        `${process.env.REACT_APP_API_URL}/api/v1/doctor/doctorregister`,
         formattedValues
       );
       dispatch(hideLoading());

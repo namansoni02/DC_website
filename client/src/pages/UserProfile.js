@@ -14,7 +14,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const getUserProfile = async () => {
       try {
-        const res = await axios.get("/api/v1/user/getUserData", {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/user/getUserData`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

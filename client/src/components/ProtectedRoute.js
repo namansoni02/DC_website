@@ -27,8 +27,8 @@ export default function ProtectedRoute({ children }) {
       dispatch(showLoading());
       const endpoint =
         loginType === "doctor"
-          ? "/api/v1/doctor/auth"
-          : "/api/v1/user/getUserData";
+          ? `${process.env.REACT_APP_API_URL}/api/v1/doctor/auth`
+          : `${process.env.REACT_APP_API_URL}/api/v1/user/getUserData`;
 
       const res = await axios.get(endpoint, {
         headers: {

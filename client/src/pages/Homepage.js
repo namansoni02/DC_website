@@ -15,7 +15,7 @@ const HomePage = () => {
 
   const getDoctors = async () => {
     try {
-      const res = await axios.get("/api/v1/doctor/getDoctors", {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/doctor/getDoctor`, {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
@@ -30,7 +30,7 @@ const HomePage = () => {
 
   const getUserData = async () => {
     try {
-      const res = await axios.get("/api/v1/user/getUserData", {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/user/getUserData`, {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
