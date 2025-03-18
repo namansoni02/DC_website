@@ -1,0 +1,38 @@
+.vertical-scroll-container-flipbook {
+    max-height: 80vh;
+    overflow-y: auto;
+    padding-right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+    background-color: white;
+  }
+  
+  .vertical-image-card-flipbook {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
+    background-color: white;
+  }
+  
+  .date-text-flipbook {
+    margin-bottom: 5px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .diagnosis-text-flipbook {
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+  
+  .vertical-history-image-flipbook {
+    max-width: 90%;
+    height: auto;
+    border-radius: 4px;
+    /* box-shadow: 0 0 8px rgba(0, 0, 0, 0.08); */
+  }
+  

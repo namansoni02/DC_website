@@ -1,14 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
-import { Button, Card, Tabs, Input, message, Collapse, Typography, Radio } from "antd";
+import { Button, Card, Tabs, Input, message, Typography, Radio } from "antd";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { SaveOutlined, RedoOutlined, PlusOutlined } from "@ant-design/icons";
-import DoctorList from "../components/DoctorList";
-import FabricDrawingCanvas from "../components/FabricDrawingCanvas"; 
+import FabricDrawingCanvas from "../components/FabricDrawingCanvas";
 import "./DrHomePage.css";
+import MedicalHistoryFlipbook from "../components/MedicalHistoryFlipbook";
 
-const { Panel } = Collapse;
 const { Title, Text } = Typography;
 
 const DrHomePage = () => {
@@ -18,7 +17,11 @@ const DrHomePage = () => {
   const [scanResult, setScanResult] = useState("");
   const [scanLoading, setScanLoading] = useState(false);
   const [medicalRecords, setMedicalRecords] = useState([]);
-  const [newRecord, setNewRecord] = useState({ diagnosis: "", prescription: "", prescriptionImage: "" });
+  const [newRecord, setNewRecord] = useState({
+    diagnosis: "",
+    prescription: "",
+    prescriptionImage: "",
+  });
   const [prescriptionType, setPrescriptionType] = useState("text");
   const qrScannerRef = useRef(null);
 
@@ -30,7 +33,6 @@ const DrHomePage = () => {
         });
         if (res.data.success) setDoctors(res.data.data);
       } catch (error) {
-        console.error("Error fetching doctors:", error);
         message.error("Failed to fetch doctors list");
       } finally {
         setLoading(false);
@@ -45,22 +47,21 @@ const DrHomePage = () => {
     } else {
       cleanupScanner();
     }
-    
-    return () => cleanupScanner(); // Cleanup on component unmount
+
+    return () => cleanupScanner();
   }, [activeTab]);
 
   const initializeScanner = () => {
     cleanupScanner();
     setTimeout(() => {
       try {
-        const scanner = new Html5QrcodeScanner("qr-reader", { 
-          fps: 10, 
-          qrbox: { width: 250, height: 250 } 
+        const scanner = new Html5QrcodeScanner("qr-reader", {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
         });
         scanner.render(onScanSuccess);
         qrScannerRef.current = scanner;
       } catch (error) {
-        console.error("Error initializing QR scanner:", error);
         message.error("Failed to initialize QR scanner");
       }
     }, 500);
@@ -79,7 +80,7 @@ const DrHomePage = () => {
 
   const onScanSuccess = async (decodedText) => {
     if (!decodedText) return message.error("Invalid QR Code");
-    
+
     const rollNumber = decodedText.split("/").pop();
     if (!rollNumber) return message.error("Invalid QR Code format");
 
@@ -87,19 +88,23 @@ const DrHomePage = () => {
     setScanLoading(true);
 
     try {
-      const response = await axios.get(`/api/v1/doctor/user-medical-history/${rollNumber}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      
+      const response = await axios.get(
+        `/api/v1/doctor/user-medical-history/${rollNumber}`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
       if (response.data.success) {
         message.success("Medical records loaded");
         setMedicalRecords(response.data.data || []);
         setActiveTab("3");
       } else {
-        message.error(response.data.message || "Failed to fetch medical records");
+        message.error(
+          response.data.message || "Failed to fetch medical records"
+        );
       }
     } catch (error) {
-      console.error("Error fetching medical records:", error);
       message.error("Error fetching medical records");
     } finally {
       setScanLoading(false);
@@ -108,252 +113,221 @@ const DrHomePage = () => {
 
   const handleSaveDrawing = (imageData) => {
     if (!imageData) {
-        console.warn("No drawing data to save");
-        message.warning("No drawing data to save");
-        return;
+      message.warning("No drawing data to save");
+      return;
     }
 
-    setNewRecord((prev) => {
-        // If the image is already saved, don't update the state
-        if (prev.prescriptionImage === imageData) {
-            console.log("Drawing is already saved.");
-            return prev;
-        }
+    const base64Image = imageData.split(",")[1]; // Store only the Base64 part
+    setNewRecord((prev) => ({
+      ...prev,
+      prescriptionImage: base64Image,
+    }));
+  };
 
-        // console.log("Saving drawing with Base64 data:", imageData);
-
-        // message.success("Drawing saved! Click 'Add Record' to save it.");
-        return { ...prev, prescriptionImage: imageData };
-    });
-};
-
-const handleAddRecord = async () => {
-    // Validate input
+  const handleAddRecord = async () => {
     if (!scanResult) {
-        message.error("No patient ID found. Please scan a QR code first.");
-        return;
+      message.error("No patient ID found. Please scan a QR code first.");
+      return;
     }
 
     if (!newRecord.diagnosis.trim()) {
-        message.error("Diagnosis is required");
-        return;
+      message.error("Diagnosis is required");
+      return;
     }
 
     if (prescriptionType === "text" && !newRecord.prescription.trim()) {
-        message.error("Prescription text is required");
-        return;
+      message.error("Prescription text is required");
+      return;
     }
 
     if (prescriptionType === "drawing" && !newRecord.prescriptionImage) {
-        message.error("Please save a prescription drawing first");
-        return;
+      message.error("Please save a prescription drawing first");
+      return;
     }
-
-    console.log("Final record before sending:", newRecord);
 
     try {
-        const recordToSend = {
-            rollNumber: scanResult,
-            diagnosis: newRecord.diagnosis.trim(),
-            prescription: prescriptionType === "text" ? newRecord.prescription.trim() : "See prescription image",
-            prescriptionImage: prescriptionType === "drawing" ? newRecord.prescriptionImage : ""
-        };
+      const recordToSend = {
+        rollNumber: scanResult,
+        diagnosis: newRecord.diagnosis.trim(),
+        prescription:
+          prescriptionType === "text"
+            ? newRecord.prescription.trim()
+            : "See prescription image",
+        prescriptionImage:
+          prescriptionType === "drawing" ? newRecord.prescriptionImage : "",
+      };
 
-        console.log("Sending record:", recordToSend);
-
-        const res = await axios.post("/api/v1/doctor/create-medical-history", recordToSend, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-
-        if (res.data.success) {
-            message.success("New record added successfully");
-
-            // Fetch updated records instead of clearing them
-            const updatedRecords = await axios.get(`/api/v1/doctor/user-medical-history/${scanResult}`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-            });
-
-            if (updatedRecords.data.success) {
-                setMedicalRecords(updatedRecords.data.data || []);
-            }
-
-            // Reset form
-            setNewRecord({ diagnosis: "", prescription: "", prescriptionImage: "" });
-        } else {
-            message.error(res.data.message || "Failed to add record");
+      const res = await axios.post(
+        "/api/v1/doctor/create-medical-history",
+        recordToSend,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
+      );
+
+      if (res.data.success) {
+        message.success("New record added successfully");
+
+        setScanResult("");
+        setMedicalRecords([]);
+        setNewRecord({ diagnosis: "", prescription: "", prescriptionImage: "" });
+        setActiveTab("2");
+      } else {
+        message.error(res.data.message || "Failed to add record");
+      }
     } catch (error) {
-        console.error("Error adding record:", error);
-        message.error("Error adding record. Please try again.");
+      message.error("Error adding record. Please try again.");
     }
-};
+  };
 
+  const renderTabItems = () => [
+    {
+      key: "1",
+      label: "Home",
+      children: (
+        <div>
+          <Title level={3}>Welcome to Doctor Dashboard</Title>
+          <Text>Use this dashboard to manage patient records and consultations.</Text>
+          <div style={{ marginTop: "20px" }}>
+            <Button
+              type="primary"
+              onClick={() => setActiveTab("2")}
+              icon={<PlusOutlined />}
+            >
+              Scan Patient QR
+            </Button>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "2",
+      label: "QR Scanner",
+      children: (
+        <div>
+          <Title level={4}>Scan Patient QR Code</Title>
+          <div id="qr-reader" style={{ maxWidth: "500px" }} />
+          {scanLoading && <Text>Loading patient data...</Text>}
+        </div>
+      ),
+    },
+    {
+      key: "3",
+      label: "Medical History",
+      children: (
+        <div>
+          <Card>
+            <p>
+              <strong>Patient ID:</strong> {scanResult}
+            </p>
+          </Card>
 
-const renderTabItems = () => [
-  {
-    key: "1",
-    label: "Home",
-    children: (
-      <div>
-        <Title level={3}>Welcome to Doctor Dashboard</Title>
-        <Text>Use this dashboard to manage patient records and consultations.</Text>
-        <div style={{ marginTop: "20px" }}>
-          <Button 
-            type="primary" 
+          {medicalRecords.length === 0 ? (
+            <Text>No medical records found for this patient.</Text>
+          ) : (
+            <MedicalHistoryFlipbook
+              medicalRecords={[...medicalRecords]
+               .reverse() // latest first
+               .map((record) => ({
+                ...record,
+               prescriptionImage: record.prescriptionImage
+               ? record.prescriptionImage.startsWith("data:image")
+               ? record.prescriptionImage
+              : `data:image/png;base64,${record.prescriptionImage}`
+             : "",
+          }))}
+          />
+
+          )}
+
+          <Button
+            icon={<RedoOutlined />}
             onClick={() => setActiveTab("2")}
-            icon={<PlusOutlined />}
+            style={{ marginTop: "15px" }}
           >
-            Scan Patient QR
+            Scan Another Patient
           </Button>
         </div>
-      </div>
-    )
-  },
-  {
-    key: "2",
-    label: "QR Scanner",
-    children: (
-      <div>
-        <Title level={4}>Scan Patient QR Code</Title>
-        <div id="qr-reader" style={{ maxWidth: "500px" }} />
-        {scanLoading && <Text>Loading patient data...</Text>}
-      </div>
-    )
-  },
-  {
-    key: "3",
-    label: "Medical History",
-    children: (
-      <div>
-        <Card>
-          <p><strong>Patient ID:</strong> {scanResult}</p>
-        </Card>
-
-        {medicalRecords.length === 0 ? (
-          <Text>No medical records found for this patient.</Text>
-        ) : (
-          <Collapse accordion style={{ marginTop: "15px", marginBottom: "20px" }}>
-            {medicalRecords
-              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-              .map((record, index) => (
-                <Panel 
-                  header={`Date: ${new Date(record.createdAt).toLocaleString()}`} 
-                  key={index}
-                >
-                  <Card>
-                    <Text strong>Diagnosis:</Text>
-                    <p>{record.diagnosis}</p>
-
-                    {record.prescription && (
-                      <>
-                        <Text strong>Prescription:</Text>
-                        <p>{record.prescription}</p>
-                      </>
-                    )}
-
-                    {record.prescriptionImage && (
-                      <div className="prescription-image-container">
-                        <Text strong>Prescription Image:</Text>
-                        <img 
-                          src={record.prescriptionImage} 
-                          alt="Prescription Drawing" 
-                          style={{ maxWidth: "100%", marginTop: "10px", border: "1px solid #ddd" }} 
-                        />
-                      </div>
-                    )}
-                  </Card>
-                </Panel>
-              ))}
-          </Collapse>
-        )}
-
-        <Button 
-          icon={<RedoOutlined />} 
-          onClick={() => setActiveTab("2")}
-          style={{ marginTop: "15px" }}
-        >
-          Scan Another Patient
-        </Button>
-      </div>
-    )
-  },
-  {
-    key: "4",
-    label: "Write Prescription",
-    children: (
-      <div>
-        <Card className="new-record-card">
-          <Title level={4}>Write New Prescription</Title>
-          <div style={{ marginBottom: "15px" }}>
-            <Text strong>Diagnosis:</Text>
-            <Input 
-              value={newRecord.diagnosis} 
-              onChange={(e) => setNewRecord({ ...newRecord, diagnosis: e.target.value })}
-              placeholder="Enter diagnosis"
-              style={{ marginTop: "5px" }}
-            />
-          </div>
-          
-          <div style={{ marginBottom: "15px" }}>
-            <Text strong>Prescription Type:</Text>
-            <Radio.Group 
-              value={prescriptionType} 
-              onChange={(e) => setPrescriptionType(e.target.value)}
-              style={{ marginLeft: "10px" }}
-            >
-              <Radio value="text">Text</Radio>
-              <Radio value="drawing">Drawing</Radio>
-            </Radio.Group>
-          </div>
-          
-          <div style={{ marginBottom: "15px" }}>
-            <Text strong>Prescription:</Text>
-            {prescriptionType === "text" ? (
-              <Input.TextArea 
-                rows={4}
-                value={newRecord.prescription} 
-                onChange={(e) => setNewRecord({ ...newRecord, prescription: e.target.value })} 
-                placeholder="Enter prescription details"
+      ),
+    },
+    {
+      key: "4",
+      label: "Write Prescription",
+      children: (
+        <div>
+          <Card className="new-record-card">
+            <Title level={4}>Write New Prescription</Title>
+            <div style={{ marginBottom: "15px" }}>
+              <Text strong>Diagnosis:</Text>
+              <Input
+                value={newRecord.diagnosis}
+                onChange={(e) =>
+                  setNewRecord({ ...newRecord, diagnosis: e.target.value })
+                }
+                placeholder="Enter diagnosis"
                 style={{ marginTop: "5px" }}
               />
-            ) : (
-              <div style={{ marginTop: "10px", border: "1px solid #ddd", padding: "10px" }}>
-                <FabricDrawingCanvas
-                  onSave={handleSaveDrawing}
-                  initialImage={newRecord.prescriptionImage}
-                />
-              </div>
-            )}
-          </div>
-          
-          <Button 
-            icon={<PlusOutlined />} 
-            onClick={handleAddRecord}
-            type="primary"
-          >
-            Add Record
-          </Button>
-        </Card>
-      </div>
-    )
-  },
-  {
-    key: "5",
-    label: "All Doctors",
-    children: <DoctorList doctors={doctors} loading={loading} />
-  }
-];
+            </div>
 
-return (
-  <Layout>
-    <Title>Doctor Dashboard</Title>
-    <Tabs
-      activeKey={activeTab}
-      onChange={setActiveTab}
-      items={renderTabItems()}
-    />
-  </Layout>
-);
+            <div style={{ marginBottom: "15px" }}>
+              <Text strong>Prescription Type:</Text>
+              <Radio.Group
+                value={prescriptionType}
+                onChange={(e) => setPrescriptionType(e.target.value)}
+                style={{ marginLeft: "10px" }}
+              >
+                <Radio value="text">Text</Radio>
+                <Radio value="drawing">Drawing</Radio>
+              </Radio.Group>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <Text strong>Prescription:</Text>
+              {prescriptionType === "text" ? (
+                <Input.TextArea
+                  rows={4}
+                  value={newRecord.prescription}
+                  onChange={(e) =>
+                    setNewRecord({ ...newRecord, prescription: e.target.value })
+                  }
+                  placeholder="Enter prescription details"
+                  style={{ marginTop: "5px" }}
+                />
+              ) : (
+                <div
+                  style={{
+                    marginTop: "10px",
+                    border: "1px solid #ddd",
+                    padding: "10px",
+                  }}
+                >
+                  <FabricDrawingCanvas
+                    onSave={handleSaveDrawing}
+                    initialImage={
+                      newRecord.prescriptionImage
+                        ? `data:image/png;base64,${newRecord.prescriptionImage}`
+                        : ""
+                    }
+                  />
+                </div>
+              )}
+            </div>
+
+            <Button icon={<PlusOutlined />} onClick={handleAddRecord} type="primary">
+              Add Record
+            </Button>
+          </Card>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <Layout>
+      <Title>Doctor Dashboard</Title>
+      <Tabs activeKey={activeTab} onChange={setActiveTab} items={renderTabItems()} />
+    </Layout>
+  );
 };
 
 export default DrHomePage;

@@ -1,0 +1,33 @@
+.vertical-scroll-container {
+    max-height: 80vh;
+    overflow-y: auto;
+    padding-right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+    background-color: white;
+  }
+  
+  .vertical-image-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
+    background-color: white;
+  }
+  
+  .date-text {
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .vertical-history-image {
+    max-width: 90%;
+    height: auto;
+    border-radius: 4px;
+  }
+  
