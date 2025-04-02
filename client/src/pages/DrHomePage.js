@@ -28,7 +28,7 @@ const DrHomePage = () => {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const res = await axios.get("/api/v1/doctor/getDoctors", {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/doctor/getDoctors`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (res.data.success) setDoctors(res.data.data);
@@ -88,13 +88,10 @@ const DrHomePage = () => {
     setScanLoading(true);
 
     try {
-      const response = await axios.get(
-        `/api/v1/doctor/user-medical-history/${rollNumber}`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/doctor/user-medical-history/${rollNumber}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      
       if (response.data.success) {
         message.success("Medical records loaded");
         setMedicalRecords(response.data.data || []);
@@ -157,13 +154,30 @@ const DrHomePage = () => {
           prescriptionType === "drawing" ? newRecord.prescriptionImage : "",
       };
 
-      const res = await axios.post(
-        "/api/v1/doctor/create-medical-history",
-        recordToSend,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        console.log("Sending record:", recordToSend);
+
+        const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/v1/doctor/create-medical-history`, recordToSend, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+
+        if (res.data.success) {
+            message.success("New record added successfully");
+
+            // Fetch updated records instead of clearing them
+            const updatedRecords = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/doctor/user-medical-history/${scanResult}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+
+            if (updatedRecords.data.success) {
+                setMedicalRecords(updatedRecords.data.data || []);
+            }
+
+            // Reset form
+            setNewRecord({ diagnosis: "", prescription: "", prescriptionImage: "" });
+        } else {
+            message.error(res.data.message || "Failed to add record");
         }
-      );
+      ;
 
       if (res.data.success) {
         message.success("New record added successfully");

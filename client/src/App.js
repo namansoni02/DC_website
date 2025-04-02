@@ -16,7 +16,7 @@ import BookingPage from "./pages/BookingPage";
 import Appointments from "./pages/Appointments";
 import DoctorAppointments from "./pages/doctors/DoctorAppointments";
 import DoctorRegister from "./pages/doctorregister";
-import ScanQR from "./pages/GenerateQR";
+// import ScanQR from "./pages/GenerateQR";
 import MedicalHistory from "./pages/MedicalHistory";
 import PatientProfile from "./pages/UserProfile";
 import UserDetail from "./pages/userDetail"; // Add this import
@@ -35,7 +35,7 @@ function App() {
               path="/scan-qr"
               element={
                 <ProtectedRoute>
-                  <ScanQR />
+                  {/* <ScanQR /> */}
                 </ProtectedRoute>
               }
             />

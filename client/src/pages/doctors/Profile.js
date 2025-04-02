@@ -19,7 +19,7 @@ const Profile = () => {
     try {
       dispatch(showLoading());
       const res = await axios.post(
-        "/api/v1/doctor/updateProfile",
+        `${process.env.REACT_APP_API_URL}/api/v1/doctor/updateProfile`,
         {
           ...values,
           userId: user._id,
@@ -53,7 +53,7 @@ const Profile = () => {
   const getDoctorInfo = async () => {
     try {
       const res = await axios.post(
-        "/api/v1/doctor/getDoctorInfo",
+        `${process.env.REACT_APP_API_URL}/api/v1/doctor/getDoctorInfo`,
         { userId: params.id },
         {
           headers: {

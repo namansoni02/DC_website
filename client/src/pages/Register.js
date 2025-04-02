@@ -14,7 +14,7 @@ const Register = () => {
   const onFinishHandler = async (values) => {
     try {
       dispatch(showLoading());
-      const res = await axios.post("/api/v1/user/register", values);
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/v1/user/register`, values);
       dispatch(hideLoading());
       if (res.data.success) {
         message.success("Registered Successfully!");
